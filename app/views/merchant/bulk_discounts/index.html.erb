@@ -1,0 +1,19 @@
+<% content_for :heading do%>
+<%= @merchant.name %>'s shop
+<%end%>
+
+<h2>My Invoices</h2>
+<table id="discount-table">
+  <tr class='headings'>
+    <th>Discount ID</th>
+    <th>Percentage</th>
+    <th>Threshold Quantity</th>
+  </tr>
+<% @bulk_discounts.each do |discount| %>
+<tr class='discount' id='bd-id-<%=discount.id%>'>
+  <td><%= link_to "#{discount.id}", merchant_bulk_discount_path(@merchant,discount) %></td>
+  <td><%= discount.discount %>%</td>
+  <td><%= discount.threshold %> items</td>
+</tr>
+<% end %>
+</table>

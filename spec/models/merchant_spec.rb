@@ -132,6 +132,14 @@ RSpec.describe Merchant, type: :model do
   let!(:polina_invoice1_itemstudded_bracelet) { InvoiceItem.create!(invoice_id: polina_invoice1.id, item_id: dainty_anklet.id, quantity: 6, unit_price: 270, status:"shipped" )}
   let!(:polina_invoice2_itemstudded_bracelet) { InvoiceItem.create!(invoice_id: polina_invoice2.id, item_id: dainty_anklet.id, quantity: 1, unit_price: 270, status:"shipped" )}
 
+
+  let!(:carly_bd_1) { carly_silo.bulk_discounts.create!(discount: 20, threshold: 15) }
+  let!(:carly_bd_2) { carly_silo.bulk_discounts.create!(discount: 25, threshold: 30) }
+  let!(:carly_bd_3) { carly_silo.bulk_discounts.create!(discount: 30, threshold: 50) }
+
+  let!(:jewlery_bd_1) { jewlery_city.bulk_discounts.create!(discount: 10, threshold: 15) }
+  let!(:jewlery_bd_2) { jewlery_city.bulk_discounts.create!(discount: 50, threshold: 1500) }
+
   describe 'class methods' do
     describe '#enabled_merchants' do
       it 'returns a list of enabled merchants' do
@@ -198,6 +206,19 @@ RSpec.describe Merchant, type: :model do
     describe '#best_sales_date' do
       it 'returns the date where given merchant had most sales' do
         expect(jewlery_city.best_sales_date).to eq("May 25, 2020")
+      end
+    end
+
+    describe '#find_relevant_discounts' do 
+      it 'finds a merchants bulk discounts' do
+        expect(carly_silo.find_relevant_discounts).to eq([carly_bd_1, carly_bd_2, carly_bd_3])
+      end
+
+      it "doesn't include a different merchants discounts" do 
+        sad_discounts = [jewlery_bd_1, jewlery_bd_2]
+        sad_discounts.each do |discount|
+          expect(carly_silo.find_relevant_discounts.include?(discount)).to be(false)
+        end
       end
     end
   end
