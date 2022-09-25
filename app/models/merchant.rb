@@ -72,4 +72,8 @@ class Merchant < ApplicationRecord
     Invoice.joins(:items).where(invoice_items: {item_id: self.items.pluck(:id)}).distinct
   end
 
+  def find_relevant_discounts
+    BulkDiscount.where(bulk_discounts: { merchant_id: id })
+  end
+
 end
