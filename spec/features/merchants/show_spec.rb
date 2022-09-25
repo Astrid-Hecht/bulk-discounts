@@ -113,6 +113,15 @@ RSpec.describe 'merchant dashboard show page', type: :feature do
         expect(current_path).to eq(merchant_invoices_path("#{carly_silo.id}"))
       end
 
+      it 'And I see a link to my bulk discounts index (/merchants/merchant_id/bulk_discounts)' do
+
+        visit "/merchants/#{carly_silo.id}/dashboard"
+        expect(page).to have_content("#{carly_silo.name}'s Bulk Discounts")
+
+        click_on("#{carly_silo.name}'s Bulk Discounts")
+        expect(current_path).to eq(merchant_bulk_discounts_path("#{carly_silo.id}"))
+      end
+
       it 'Then I see the names of the top 5 customers who have conducted the largest number of successful transactions with my merchant' do
 
         visit "/merchants/#{jewlery_city.id}/dashboard"
