@@ -29,10 +29,11 @@ RSpec.describe 'Merchant Index Show Page' do
   #this invoice contains an item belonging to this merchant, but no info should be should on invoice1 show page
   let!(:alainainvoice2_itemstudded_bracelet) { InvoiceItem.create!(invoice_id: alaina_invoice2.id, item_id: studded_bracelet.id, quantity: 40, unit_price: 1500, status:"shipped" )}
   
+  before(:each) {visit merchant_invoice_path(jewlery_city, alaina_invoice1)}
+
   describe 'when I visit a merchant invoice show page' do
     describe 'I see information related to the invoice' do
       it 'displays id number, status, date of creation, customer full name' do
-        visit merchant_invoice_path(jewlery_city, alaina_invoice1)
 
         expect(page).to have_content("Invoice ##{alaina_invoice1.id}")
         expect(page).to have_content("Status: #{alaina_invoice1.status}")
@@ -44,7 +45,6 @@ RSpec.describe 'Merchant Index Show Page' do
     describe 'I see all of MY items on the invoice' do
 
       it 'displays the name of each merchant item on the invoice' do
-        visit merchant_invoice_path(jewlery_city, alaina_invoice1)
         within("#invoice_items") do
           expect(page).to have_content(silver_necklace.name)
           expect(page).to have_content(gold_earrings.name)
@@ -62,7 +62,6 @@ RSpec.describe 'Merchant Index Show Page' do
       end
 
       it 'displays the quantity, sale price, and status for each item' do
-        visit merchant_invoice_path(jewlery_city, alaina_invoice1)
         within("#item_#{gold_earrings.id}") do
           expect(page).to have_content("#{alainainvoice9_itemgold_earrings.quantity}")
           expect(page).to have_content("#{((alainainvoice9_itemgold_earrings.unit_price)/100.to_f).round(2)}")
@@ -78,7 +77,6 @@ RSpec.describe 'Merchant Index Show Page' do
       
       describe 'when I change an items status and click the submit button' do
         it 'takes me back to the merchant invoice show page and shows the updated status' do
-          visit merchant_invoice_path(jewlery_city, alaina_invoice1)
 
           within("#item_#{gold_earrings.id}") do
             expect(page).to have_field("Status", with: "packaged")
@@ -95,13 +93,18 @@ RSpec.describe 'Merchant Index Show Page' do
       end
 
       it 'Then I see the total revenue that will be generated from all of my items on the invoice' do
-        visit merchant_invoice_path(jewlery_city, alaina_invoice1)
-
         within("#total_invoice_revenue") do
-          expect(page).to have_content("Total Revenue From This Invoice: $#{sprintf("%.2f",alaina_invoice1.calculate_invoice_revenue/100.to_f)}")
+          expect(page).to have_content("Total Revenue From This Invoice: $#{sprintf("%.2f",alaina_invoice1.calculate_total_revenue/100.to_f)}")
         end
       end
 
+      describe 'Bulk Discount Revenue' do
+        it 'And I see the total discounted revenue for my merchant from this invoice which includes bulk discounts in the calculation' do
+          within("#discount_invoice_revenue") do
+            expect(page).to have_content("Total Discounted Revenue From This Invoice: $#{sprintf("%.2f",alaina_invoice1.discount_total_revenue/100.to_f)}")
+          end
+        end
+      end
     end
   end
 end

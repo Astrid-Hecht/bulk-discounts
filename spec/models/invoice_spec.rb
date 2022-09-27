@@ -86,8 +86,7 @@ RSpec.describe Invoice, type: :model do
       end
     end
 
-
-    describe '#calculate_invoice_revenue(merchant)' do
+    describe 'revenue methods' do 
       let!(:jewlery_city) { Merchant.create!(name: "Jewlery City Merchant")}
       let!(:carly_silo) { Merchant.create!(name: "Carly Simon's Candy Silo")}
 
@@ -101,13 +100,84 @@ RSpec.describe Invoice, type: :model do
 
       let!(:alainainvoice1_itemgold_earrings) { InvoiceItem.create!(invoice_id: alaina_invoice1.id, item_id: gold_earrings.id, quantity: 4, unit_price: 1300, status:"packaged" )}
       let!(:alainainvoice1_itemsilver_necklace) { InvoiceItem.create!(invoice_id: alaina_invoice1.id, item_id: silver_necklace.id, quantity: 4, unit_price: 1300, status:"packaged" )}
-      let!(:alainainvoice1_itemglicorice) { InvoiceItem.create!(invoice_id: alaina_invoice1.id, item_id: licorice.id, quantity: 4, unit_price: 1300, status:"packaged" )}
+      let!(:alainainvoice1_itemglicorice) { InvoiceItem.create!(invoice_id: alaina_invoice1.id, item_id: licorice.id, quantity: 3, unit_price: 1300, status:"packaged" )}
+      
+      let!(:jc_total) {(alainainvoice1_itemgold_earrings.quantity * alainainvoice1_itemgold_earrings.unit_price) + (alainainvoice1_itemsilver_necklace.quantity * alainainvoice1_itemsilver_necklace.unit_price)}
+      
+      describe '#merchant_invoice_revenue' do
+        it 'returns the total amount of revenue that invoice generated for invoice merchant' do
+          expect(alaina_invoice1.merchant_invoice_revenue(jewlery_city)).to eq(jc_total)
+        end
 
-      it 'takes a merchant as an arg and returns the total amount of revenue that invoice generated for that merchant' do
-        expect(alaina_invoice1.calculate_invoice_revenue).to eq(15600)
+        it 'should not include items from different merchants in calculation' do
+          expect(alaina_invoice1.merchant_invoice_revenue(jewlery_city) < jc_total + alaina_invoice1.merchant_invoice_revenue(carly_silo)).to be(true)
+        end
+      end
+
+      describe '#calculate_total_revenue' do
+        it 'returns the total amount of revenue that invoice generated for invoice merchant' do
+          expect(alaina_invoice1.calculate_invoice_revenue).to eq(jc_total + alaina_invoice1.merchant_invoice_revenue(carly_silo))
+        end
+      end
+
+      describe '#discount_invoice_revenue' do
+        it 'returns the total amount of revenue that invoice generated for merchant if no bulk discounts' do
+          expect(alaina_invoice1.discount_merchant_invoice_revenue(jewlery_city)).to eq(jc_total)
+        end
+        
+        before(:each) {@jc_discount = jewlery_city.bulk_discount.create!(discount: 50, threshold: 5)}
+
+        it 'returns the total amount of revenue that invoice generated for merchant if no BulkDiscount thresholds are met' do
+          expect(alaina_invoice1.discount_merchant_invoice_revenue(jewlery_city)).to eq(jc_total)
+        end
+
+        it 'should not be affected by bulk discounts from different merchants, even if items on invoice qualify' do
+          carly_silo.bulk_discount.create!(discount: 10, threshold: 2)
+          carly_silo.bulk_discount.create!(discount: 50, threshold: 4)
+
+          expect(alaina_invoice1.discount_merchant_invoice_revenue(jewlery_city)).to eq(jc_total)
+        end
+
+        it 'should calculate revenue with discount if items from merchant are past threshold' do
+          InvoiceItem.find(alainainvoice1_itemgold_earrings.id).update!(invoice_id: alaina_invoice1.id, item_id: gold_earrings.id, quantity: 5, unit_price: 1300, status:"packaged" )
+          InvoiceItem.find(alainainvoice1_itemsilver_necklace.id).update!(invoice_id: alaina_invoice1.id, item_id: silver_necklace.id, quantity: 5, unit_price: 1300, status:"packaged" )
+
+          expect(alaina_invoice1.discount_merchant_invoice_revenue(jewlery_city)).to eq(jc_total / 2)
+        end
+
+        it 'should only discount group of items over threshold and calculate other ones regularly' do
+          InvoiceItem.find(alainainvoice1_itemgold_earrings.id).update!(invoice_id: alaina_invoice1.id, item_id: gold_earrings.id, quantity: 5, unit_price: 1300, status:"packaged" )
+                                                                                                                      # invoice revenue is equally split between earrings and necklace,
+          expect(alaina_invoice1.discount_merchant_invoice_revenue(jewlery_city)).to eq(jc_total / 4 + jc_total / 2)  # so a 50% discount on only one of the item sets drops total by 25%
+        end
+
+        it 'should calculate revenue with best applicable discount' do
+          jewlery_city.bulk_discount.create!(discount: 10, threshold: 2)
+          InvoiceItem.find(alainainvoice1_itemgold_earrings.id).update!(invoice_id: alaina_invoice1.id, item_id: gold_earrings.id, quantity: 5, unit_price: 1300, status:"packaged" )
+          InvoiceItem.find(alainainvoice1_itemsilver_necklace.id).update!(invoice_id: alaina_invoice1.id, item_id: silver_necklace.id, quantity: 5, unit_price: 1300, status:"packaged" )
+
+          expect(alaina_invoice1.discount_merchant_invoice_revenue(jewlery_city)).to eq(jc_total / 2)
+        end
+
+        it 'should calculate revenue with best applicable discount even if threshold is lower than others' do
+          jewlery_city.bulk_discount.create!(discount: 90, threshold: 2)
+          InvoiceItem.find(alainainvoice1_itemgold_earrings.id).update!(invoice_id: alaina_invoice1.id, item_id: gold_earrings.id, quantity: 5, unit_price: 1300, status:"packaged" )
+          InvoiceItem.find(alainainvoice1_itemsilver_necklace.id).update!(invoice_id: alaina_invoice1.id, item_id: silver_necklace.id, quantity: 5, unit_price: 1300, status:"packaged" )
+
+          expect(alaina_invoice1.discount_merchant_invoice_revenue(jewlery_city)).to eq(jc_total / 10)
+        end
+      end
+
+      descibe '#discount_total_revenue' do
+        before(:each) do
+          jewlery_city.bulk_discount.create!(discount: 50, threshold: 4)
+          carly_silo.bulk_discount.create!(discount: 10, threshold: 2)
+        end
+
+        it 'should calculate total revenue with discounts' do
+          expect(alaina_invoice1.discount_invoice_revenue).to eq(alaina_invoice1.discount_merchant_invoice_revenue(jewlery_city) + alaina_invoice1.discount_merchant_invoice_revenue(carly_silo))
+        end
       end
     end
-
   end
-
 end
