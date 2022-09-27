@@ -20,8 +20,8 @@ RSpec.describe "merchant's bulk discount edit page", type: :feature do
       end
 
       it "where I see a form to edit the bulk discount And I see that the discounts current attributes are pre-poluated" do
-        expect(page).to have_field("Percent Discount:"), with: carly_bd_1.discount
-        expect(page).to have_field("Quantity Threshold:"), with: carly_bd_1.threshold
+        expect(page).to have_field("Percent Discount:", with: '20')
+        expect(page).to have_field("Quantity Threshold:", with: '15')
         expect(page).to have_button("Update")
       end
 
@@ -33,9 +33,9 @@ RSpec.describe "merchant's bulk discount edit page", type: :feature do
         
         click_link "Edit Bulk Discount"
 
-        fill_in "Percent Discount:", with: 25
-        fill_in "Quantity Threshold:", with: 25
-        click_button "Create"
+        fill_in "Percent Discount:", with: '25'
+        fill_in "Quantity Threshold:", with: '25'
+        click_button "Update"
 
         expect(current_path).to eq(merchant_bulk_discount_path(carly, carly_bd_1))
         expect(page).to have_content("Percent Discount: 25%")
