@@ -10,6 +10,13 @@ class Merchant::BulkDiscountsController < Merchant::BaseController
     redirect_to merchant_bulk_discounts_path(@merchant)
   end
 
+  def create
+    bulk_discount = @merchant.bulk_discounts.new(bulk_discount_params)
+    bulk_discount.save
+    flash.notice = "New Discount (ID: #{bulk_discount.id} Created for #{@merchant.name}"
+    redirect_to merchant_bulk_discounts_path(@merchant)
+  end
+
   private
   def bulk_discount_params
     params.permit(:discount, :threshold)
