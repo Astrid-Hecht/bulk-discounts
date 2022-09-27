@@ -104,6 +104,7 @@ RSpec.describe Invoice, type: :model do
       
       let!(:jc_total) {(alainainvoice1_itemgold_earrings.quantity * alainainvoice1_itemgold_earrings.unit_price) + (alainainvoice1_itemsilver_necklace.quantity * alainainvoice1_itemsilver_necklace.unit_price)}
       
+    # regular revenue
       describe '#merchant_invoice_revenue' do
         it 'returns the total amount of revenue that invoice generated for invoice merchant' do
           expect(alaina_invoice1.merchant_invoice_revenue(jewlery_city)).to eq(jc_total)
@@ -120,12 +121,13 @@ RSpec.describe Invoice, type: :model do
         end
       end
 
+    # discount revenue
       describe '#discount_invoice_revenue' do
         it 'returns the total amount of revenue that invoice generated for merchant if no bulk discounts' do
           expect(alaina_invoice1.discount_merchant_invoice_revenue(jewlery_city)).to eq(jc_total)
         end
-        
-        before(:each) {@jc_discount = jewlery_city.bulk_discount.create!(discount: 50, threshold: 5)}
+
+        before(:each) { jewlery_city.bulk_discount.create!(discount: 50, threshold: 5)}
 
         it 'returns the total amount of revenue that invoice generated for merchant if no BulkDiscount thresholds are met' do
           expect(alaina_invoice1.discount_merchant_invoice_revenue(jewlery_city)).to eq(jc_total)
@@ -139,30 +141,40 @@ RSpec.describe Invoice, type: :model do
         end
 
         it 'should calculate revenue with discount if items from merchant are past threshold' do
-          InvoiceItem.find(alainainvoice1_itemgold_earrings.id).update!(invoice_id: alaina_invoice1.id, item_id: gold_earrings.id, quantity: 5, unit_price: 1300, status:"packaged" )
-          InvoiceItem.find(alainainvoice1_itemsilver_necklace.id).update!(invoice_id: alaina_invoice1.id, item_id: silver_necklace.id, quantity: 5, unit_price: 1300, status:"packaged" )
+          InvoiceItem.find(alainainvoice1_itemgold_earrings.id).update!(invoice_id: alaina_invoice1.id, item_id: gold_earrings.id,
+                                                                        quantity: 5, unit_price: 1300, status:"packaged" )
+          InvoiceItem.find(alainainvoice1_itemsilver_necklace.id).update!(invoice_id: alaina_invoice1.id, item_id: silver_necklace.id,
+                                                                          quantity: 5, unit_price: 1300, status:"packaged" )
 
           expect(alaina_invoice1.discount_merchant_invoice_revenue(jewlery_city)).to eq(jc_total / 2)
         end
 
         it 'should only discount group of items over threshold and calculate other ones regularly' do
-          InvoiceItem.find(alainainvoice1_itemgold_earrings.id).update!(invoice_id: alaina_invoice1.id, item_id: gold_earrings.id, quantity: 5, unit_price: 1300, status:"packaged" )
+          InvoiceItem.find(alainainvoice1_itemgold_earrings.id).update!(invoice_id: alaina_invoice1.id, 
+                                                                        item_id: gold_earrings.id, quantity: 5,
+                                                                        unit_price: 1300, status:"packaged" )
                                                                                                                       # invoice revenue is equally split between earrings and necklace,
           expect(alaina_invoice1.discount_merchant_invoice_revenue(jewlery_city)).to eq(jc_total / 4 + jc_total / 2)  # so a 50% discount on only one of the item sets drops total by 25%
         end
 
         it 'should calculate revenue with best applicable discount' do
           jewlery_city.bulk_discount.create!(discount: 10, threshold: 2)
-          InvoiceItem.find(alainainvoice1_itemgold_earrings.id).update!(invoice_id: alaina_invoice1.id, item_id: gold_earrings.id, quantity: 5, unit_price: 1300, status:"packaged" )
-          InvoiceItem.find(alainainvoice1_itemsilver_necklace.id).update!(invoice_id: alaina_invoice1.id, item_id: silver_necklace.id, quantity: 5, unit_price: 1300, status:"packaged" )
+          InvoiceItem.find(alainainvoice1_itemgold_earrings.id).update!(invoice_id: alaina_invoice1.id, 
+                                                                        item_id: gold_earrings.id, quantity: 5,
+                                                                        unit_price: 1300, status:"packaged" )
+          InvoiceItem.find(alainainvoice1_itemsilver_necklace.id).update!(invoice_id: alaina_invoice1.id, 
+                                                                          item_id: silver_necklace.id, quantity: 5,
+                                                                          unit_price: 1300, status:"packaged" )
 
           expect(alaina_invoice1.discount_merchant_invoice_revenue(jewlery_city)).to eq(jc_total / 2)
         end
 
         it 'should calculate revenue with best applicable discount even if threshold is lower than others' do
           jewlery_city.bulk_discount.create!(discount: 90, threshold: 2)
-          InvoiceItem.find(alainainvoice1_itemgold_earrings.id).update!(invoice_id: alaina_invoice1.id, item_id: gold_earrings.id, quantity: 5, unit_price: 1300, status:"packaged" )
-          InvoiceItem.find(alainainvoice1_itemsilver_necklace.id).update!(invoice_id: alaina_invoice1.id, item_id: silver_necklace.id, quantity: 5, unit_price: 1300, status:"packaged" )
+          InvoiceItem.find(alainainvoice1_itemgold_earrings.id).update!(invoice_id: alaina_invoice1.id, item_id: gold_earrings.id,
+                                                                        quantity: 5, unit_price: 1300, status:"packaged" )
+          InvoiceItem.find(alainainvoice1_itemsilver_necklace.id).update!(invoice_id: alaina_invoice1.id, item_id: silver_necklace.id,
+                                                                          quantity: 5, unit_price: 1300, status:"packaged" )
 
           expect(alaina_invoice1.discount_merchant_invoice_revenue(jewlery_city)).to eq(jc_total / 10)
         end
