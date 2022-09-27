@@ -122,21 +122,21 @@ RSpec.describe Invoice, type: :model do
       end
 
     # discount revenue
-      describe '#discount_invoice_revenue' do
+      describe '#invoice_discount' do
         it 'returns the total amount of revenue that invoice generated for merchant if no bulk discounts' do
-          expect(alaina_invoice1.discount_invoice_revenue).to eq(0)
+          expect(alaina_invoice1.invoice_discount).to eq(0)
         end
 
         before(:each) { jewlery_city.bulk_discounts.create!(discount: 50, threshold: 5)}
 
         it 'returns no discount for invoice if no BulkDiscount thresholds are met' do
-          expect(alaina_invoice1.discount_invoice_revenue).to eq(0)
+          expect(alaina_invoice1.invoice_discount).to eq(0)
         end
 
         it 'should not be affected by bulk discounts from different merchants, even if items on invoice from non associated merchant qualify' do
           carly_silo.bulk_discounts.create!(discount: 50, threshold: 4)
 
-          expect(alaina_invoice1.discount_invoice_revenue).to eq(0)
+          expect(alaina_invoice1.invoice_discount).to eq(0)
         end
 
         it 'should calculate discount if items from merchant are past threshold' do
@@ -145,14 +145,14 @@ RSpec.describe Invoice, type: :model do
           InvoiceItem.find(alainainvoice1_itemsilver_necklace.id).update!(invoice_id: alaina_invoice1.id, item_id: silver_necklace.id,
                                                                           quantity: 5, unit_price: 1300, status:"packaged" )
 
-          expect(alaina_invoice1.discount_invoice_revenue).to eq( 2 * (5 * 1300) * 0.5 )
+          expect(alaina_invoice1.invoice_discount).to eq( 2 * (5 * 1300) * 0.5 )
         end
 
         it 'should only discount groups of items over threshold and ignore others' do
           InvoiceItem.find(alainainvoice1_itemgold_earrings.id).update!(invoice_id: alaina_invoice1.id, 
                                                                         item_id: gold_earrings.id, quantity: 5,
                                                                         unit_price: 1300, status:"packaged" )
-          expect(alaina_invoice1.discount_invoice_revenue).to eq((5 * 1300) * 0.5)
+          expect(alaina_invoice1.invoice_discount).to eq((5 * 1300) * 0.5)
         end
 
         it 'should calculate best applicable discount' do
@@ -164,7 +164,7 @@ RSpec.describe Invoice, type: :model do
                                                                           item_id: silver_necklace.id, quantity: 5,
                                                                           unit_price: 1300, status:"packaged" )
 
-          expect(alaina_invoice1.discount_invoice_revenue).to eq(2 * (5 * 1300) * 0.5)
+          expect(alaina_invoice1.invoice_discount).to eq(2 * (5 * 1300) * 0.5)
         end
 
         it 'should calculate revenue with best applicable discount even if threshold is lower than others' do
@@ -174,7 +174,7 @@ RSpec.describe Invoice, type: :model do
           InvoiceItem.find(alainainvoice1_itemsilver_necklace.id).update!(invoice_id: alaina_invoice1.id, item_id: silver_necklace.id,
                                                                           quantity: 5, unit_price: 1300, status:"packaged" )
 
-          expect(alaina_invoice1.discount_invoice_revenue).to eq(2 * (5 * 1300) * 0.9)
+          expect(alaina_invoice1.invoice_discount).to eq(2 * (5 * 1300) * 0.9)
         end
 
         it 'should be able to calculate discounts from two merchants on correct items if invoice has items from >1 merchant' do
@@ -184,7 +184,15 @@ RSpec.describe Invoice, type: :model do
           InvoiceItem.find(alainainvoice1_itemsilver_necklace.id).update!(invoice_id: alaina_invoice1.id, item_id: silver_necklace.id,
                                                                           quantity: 5, unit_price: 1300, status:"packaged" )
 
-          expect(alaina_invoice1.discount_invoice_revenue).to eq((2 * (5 * 1300) * 0.5) + (3 * 1300) * 0.1)
+          expect(alaina_invoice1.invoice_discount).to eq((2 * (5 * 1300) * 0.5) + (3 * 1300) * 0.1)
+        end
+      end
+
+      describe '#discount_invoice_revenue' do
+        it 'subtracts found discount from total revenue for invoice to return total revenue after discounts' do
+          jewlery_city.bulk_discounts.create!(discount: 50, threshold: 5)
+          carly_silo.bulk_discounts.create!(discount: 10, threshold: 2)
+          expect(alaina_invoice1.discount_invoice_revenue).to eq(alaina_invoice1.calculate_invoice_revenue - alaina_invoice1.invoice_discount)
         end
       end
     end
