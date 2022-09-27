@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe "merchant's bulk discount create page", type: :feature do
   describe 'As a merchant' do
-    describe "When I visit my bulk discount's index page" do
+    describe "When I visit my bulk discount's create page" do
       let!(:carly) { Merchant.create!(name: "Carly Simon's Candy Silo") }
       
       describe "When I visit my bulk discount's index page" do
