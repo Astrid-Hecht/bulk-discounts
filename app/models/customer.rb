@@ -1,7 +1,9 @@
 class Customer < ApplicationRecord
-  has_many :invoices, dependent: :destroy
   validates :first_name, presence: true
   validates :last_name, presence: true
+  has_many :invoices, dependent: :destroy
+  has_many :merchants, through: :invoices
+  has_many :transactions, through: :invoices
 
   # Class Methods
   def self.top_5_customers

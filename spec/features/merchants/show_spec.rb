@@ -32,7 +32,7 @@ RSpec.describe 'merchant dashboard show page', type: :feature do
       let!(:whitney_invoice5) { whitney.invoices.create!(status: "completed")}
       let!(:whitney_invoice6) { whitney.invoices.create!(status: "completed")}
       let!(:alaina_invoice1) { alaina.invoices.create!(status: "completed", created_at: "2012-01-30 14:54:09")}
-      let!(:alaina_invoice2) { alaina.invoices.create!(status: "in_progress", created_at: "2012-04-30 14:54:09")}
+      let!(:alaina_invoice2) { alaina.invoices.create!(status: "completed", created_at: "2012-04-30 14:54:09")}
       let!(:alaina_invoice3) { alaina.invoices.create!(status: "completed", created_at: "2012-10-30 14:54:09")}
       let!(:alaina_invoice4) { alaina.invoices.create!(status: "completed", created_at: "2000-04-30 14:54:09")}
       let!(:alaina_invoice5) { alaina.invoices.create!(status: "completed", created_at: "2023-02-30 14:54:09")}
@@ -42,7 +42,7 @@ RSpec.describe 'merchant dashboard show page', type: :feature do
       let!(:ryan_invoice1) { ryan.invoices.create!(status: "completed", created_at: "1994-04-30 14:54:09")}
       let!(:ryan_invoice2) { ryan.invoices.create!(status: "completed", created_at: "1995-04-30 14:54:09")}
       let!(:polina_invoice1) { polina.invoices.create!(status: "completed", created_at: "1996-04-30 14:54:09")}
-      let!(:polina_invoice2) { polina.invoices.create!(status: "cancelled", created_at: "1997-04-30 14:54:09")}
+      let!(:polina_invoice2) { polina.invoices.create!(status: "completed", created_at: "1997-04-30 14:54:09")}
       let!(:leah_invoice1) { leah.invoices.create!(status: "cancelled")}
       let!(:leah_invoice2) { leah.invoices.create!(status: "in_progress")}
 
@@ -87,6 +87,8 @@ RSpec.describe 'merchant dashboard show page', type: :feature do
       let!(:polina_invoice1_itemdainty_anklet) { InvoiceItem.create!(invoice_id: polina_invoice1.id, item_id: dainty_anklet.id, quantity: 6, unit_price: 270, status:1)}
       let!(:polina_invoice2_itemdainty_anklet) { InvoiceItem.create!(invoice_id: polina_invoice2.id, item_id: dainty_anklet.id, quantity: 1, unit_price: 270, status:1 )}
 
+      let!(:ryan_invoice1_itemdainty_anklet) { InvoiceItem.create!(invoice_id: ryan_invoice1.id, item_id: dainty_anklet.id, quantity: 1, unit_price: 270, status:1 )}
+
       it 'Then I see the name of my merchant' do
 
         visit "/merchants/#{carly_silo.id}/dashboard"
@@ -127,12 +129,12 @@ RSpec.describe 'merchant dashboard show page', type: :feature do
         visit "/merchants/#{jewlery_city.id}/dashboard"
         expect(page).to have_content("Top 5 Customers")
 
-        within('#top_5_customers') do 
-        expect(whitney.first_name).to appear_before(alaina.first_name)
-        expect(alaina.first_name).to appear_before(eddie.first_name)
-        expect(eddie.first_name).to appear_before(polina.first_name)
-        expect(polina.first_name).to appear_before(ryan.first_name)
-        expect(page).to_not have_content(leah.first_name)
+        within('#top_5_customers') do
+          expect(whitney.first_name).to appear_before(alaina.first_name)
+          expect(alaina.first_name).to appear_before(eddie.first_name)
+          expect(eddie.first_name).to appear_before(polina.first_name)
+          expect(polina.first_name).to appear_before(ryan.first_name)
+          expect(page).to_not have_content(leah.first_name)
       end
 
       end
@@ -144,11 +146,11 @@ RSpec.describe 'merchant dashboard show page', type: :feature do
         expect(page).to have_content("Top 5 Customers")
         
         within('#top_5_customers') do 
-          expect(page).to have_content("1.#{whitney.first_name} #{whitney.last_name} - #{whitney.num_succesful_transactions} purchases")
-          expect(page).to have_content("2.#{alaina.first_name} #{alaina.last_name} - #{alaina.num_succesful_transactions} purchases")
-          expect(page).to have_content("3.#{eddie.first_name} #{eddie.last_name} - #{eddie.num_succesful_transactions} purchases")
-          expect(page).to have_content("4.#{polina.first_name} #{polina.last_name} - #{polina.num_succesful_transactions} purchases")
-          expect(page).to have_content("5.#{ryan.first_name} #{ryan.last_name} - #{ryan.num_succesful_transactions} purchases")
+          expect(page).to have_content("#{whitney.first_name} #{whitney.last_name} - #{whitney.num_succesful_transactions} purchases")
+          expect(page).to have_content("#{alaina.first_name} #{alaina.last_name} - #{alaina.num_succesful_transactions} purchases")
+          expect(page).to have_content("#{eddie.first_name} #{eddie.last_name} - #{eddie.num_succesful_transactions} purchases")
+          expect(page).to have_content("#{polina.first_name} #{polina.last_name} - #{polina.num_succesful_transactions} purchases")
+          expect(page).to have_content("#{ryan.first_name} #{ryan.last_name} - #{ryan.num_succesful_transactions} purchases")
         end
       end
 
@@ -187,7 +189,7 @@ RSpec.describe 'merchant dashboard show page', type: :feature do
         expect(page).to have_content("Dainty Ankley - Invoice ##{polina_invoice1.id}")
         expect(page).to have_content("Dainty Ankley - Invoice ##{polina_invoice2.id}")
         expect(page).to_not have_content("Dainty Ankley - Invoice ##{alaina_invoice1.id}")
-        expect(page).to_not have_content("Dainty Ankley - Invoice ##{ryan_invoice1.id}")
+        expect(page).to have_content("Dainty Ankley - Invoice ##{ryan_invoice1.id}")
       end
       end
 
@@ -205,7 +207,8 @@ RSpec.describe 'merchant dashboard show page', type: :feature do
           expect(page).to have_link("#{polina_invoice1.id}")
           expect(page).to have_link("#{polina_invoice2.id}")
           expect(page).to have_link("#{alaina_invoice4.id}")
-          expect(page).to_not have_link("#{ryan_invoice1.id}")
+          expect(page).to have_link("#{ryan_invoice1.id}")
+          expect(page).to_not have_link("#{leah_invoice1.id}")
           
           click_on("#{alaina_invoice1.id}")
           expect(current_path).to eq("/merchants/#{jewlery_city.id}/invoices/#{alaina_invoice1.id}")

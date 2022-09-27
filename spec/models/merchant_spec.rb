@@ -71,7 +71,7 @@ RSpec.describe Merchant, type: :model do
   let!(:ryan_invoice1) { ryan.invoices.create!(status: "completed")}
   let!(:ryan_invoice2) { ryan.invoices.create!(status: "completed")}
   let!(:polina_invoice1) { polina.invoices.create!(status: "completed")}
-  let!(:polina_invoice2) { polina.invoices.create!(status: "cancelled")}
+  let!(:polina_invoice2) { polina.invoices.create!(status: "completed")}
   let!(:leah_invoice1) { leah.invoices.create!(status: "cancelled")}
   let!(:leah_invoice2) { leah.invoices.create!(status: "in_progress")}
 
@@ -132,6 +132,7 @@ RSpec.describe Merchant, type: :model do
   let!(:polina_invoice1_itemstudded_bracelet) { InvoiceItem.create!(invoice_id: polina_invoice1.id, item_id: dainty_anklet.id, quantity: 6, unit_price: 270, status:"shipped" )}
   let!(:polina_invoice2_itemstudded_bracelet) { InvoiceItem.create!(invoice_id: polina_invoice2.id, item_id: dainty_anklet.id, quantity: 1, unit_price: 270, status:"shipped" )}
 
+  let!(:ryan_invoice1_itemstudded_bracelet) { InvoiceItem.create!(invoice_id: ryan_invoice1.id, item_id: dainty_anklet.id, quantity: 1, unit_price: 270, status:"shipped" )}
 
   let!(:carly_bd_1) { carly_silo.bulk_discounts.create!(discount: 20, threshold: 15) }
   let!(:carly_bd_2) { carly_silo.bulk_discounts.create!(discount: 25, threshold: 30) }
@@ -159,7 +160,7 @@ RSpec.describe Merchant, type: :model do
       end
 
       it 'calculates each top merchants total revenue' do
-        expected_revs = [33988082, 928000, 64000, 22800, 1500]
+        expected_revs = [33988352, 928000, 64000, 22800, 1500]
         Merchant.merchants_top_5.each_with_index do |merchant, index|
           expect(merchant.revenue).to eq(expected_revs[index])
         end
@@ -184,8 +185,10 @@ RSpec.describe Merchant, type: :model do
 
     describe '#transactions_top_5' do
       it 'finds the top 5 customers with the most successful transactions with a particular merchant' do
-
-        expect(jewlery_city.transactions_top_5.pluck(:first_name)).to eq(["Alaina", "Whitney", "Eddie", "Polina", "Ryan"])
+        actual = jewlery_city.fav_customers.map do |customer|
+          customer[:first_name]
+        end
+        expect(actual).to eq(["Alaina", "Whitney", "Eddie", "Polina", "Ryan"])
       end
     end
 
