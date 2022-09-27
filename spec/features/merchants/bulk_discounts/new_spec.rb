@@ -13,6 +13,7 @@ RSpec.describe "merchant's bulk discount create page", type: :feature do
           expect(current_path).to eq(new_merchant_bulk_discount_path(carly))
         end
       end
+
       before(:each) do
         visit new_merchant_bulk_discount_path(carly)
       end
@@ -33,12 +34,39 @@ RSpec.describe "merchant's bulk discount create page", type: :feature do
         fill_in "Quantity Threshold:", with: 25
         click_button "Create"
 
+        expect(page).to have_content("Bulk discount has been successfully created.")
         expect(page).to have_selector(:css, '.discount', count: 1)
 
         within '#discount-table' do
           expect(page).to have_content("20%")
           expect(page).to have_content("25 items")
         end
+      end
+
+      it "flashes a warning & doesnt submit if discount is not positive int" do
+        fill_in "Percent Discount:", with: '0'
+        fill_in "Quantity Threshold:", with: '25'
+        click_button "Create"
+        expect(current_path).to eq(new_merchant_bulk_discount_path(carly))
+        expect(page).to have_content("Percent discount must be greater than zero. Please try again.")
+      end
+
+      it "flashes a warning & doesnt submit if threshold is not positive int" do
+        fill_in "Percent Discount:", with: '25'
+        fill_in "Quantity Threshold:", with: '0'
+        click_button "Create"
+
+        expect(current_path).to eq(new_merchant_bulk_discount_path(carly))
+        expect(page).to have_content("Threshold must be greater than zero. Please try again.")
+      end
+      
+      it "flashes a warning & doesnt submit if a field is empty" do
+        fill_in "Percent Discount:", with: ''
+        fill_in "Quantity Threshold:", with: '45'
+        click_button "Create"
+
+        expect(current_path).to eq(new_merchant_bulk_discount_path(carly))
+        expect(page).to have_content("Both fields must have values. Please try again.")
       end
     end
   end

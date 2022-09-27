@@ -3,7 +3,7 @@
 <%end%>
 
 <h1>New Bulk Discount</h1>
-
+<p><%= flash.notice %></p>
 <%= form_with url: merchant_bulk_discounts_path(@merchant), method: :post do |f| %>
   <%= f.label :discount, "Percent Discount:" %>
   <%= f.number_field :discount %>

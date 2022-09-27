@@ -37,10 +37,37 @@ RSpec.describe "merchant's bulk discount edit page", type: :feature do
         fill_in "Quantity Threshold:", with: '25'
         click_button "Update"
 
+        expect(page).to have_content('Bulk discount has been successfully updated.')
+
         expect(current_path).to eq(merchant_bulk_discount_path(carly, carly_bd_1))
         expect(page).to have_content("Percent Discount: 25%")
         expect(page).to have_content("Quantity Threshold: 25 items")
 
+      end
+
+      it "flashes a warning & doesnt submit if discount is not positive int" do
+        fill_in "Percent Discount:", with: '0'
+        fill_in "Quantity Threshold:", with: '25'
+        click_button "Update"
+        expect(current_path).to eq(edit_merchant_bulk_discount_path(carly, carly_bd_1))
+        expect(page).to have_content("Percent discount must be greater than zero. Please try again.")
+      end
+
+      it "flashes a warning & doesnt submit if threshold is not positive int" do
+        fill_in "Percent Discount:", with: '34'
+        fill_in "Quantity Threshold:", with: '0'
+        click_button "Update"
+
+        expect(current_path).to eq(edit_merchant_bulk_discount_path(carly, carly_bd_1))
+        expect(page).to have_content("Threshold must be greater than zero. Please try again.")
+      end
+      it "flashes a warning & doesnt submit if a field is empty" do
+        fill_in "Percent Discount:", with: ''
+        fill_in "Quantity Threshold:", with: ''
+        click_button "Update"
+
+        expect(current_path).to eq(edit_merchant_bulk_discount_path(carly, carly_bd_1))
+        expect(page).to have_content("Both fields must have values. Please try again.")
       end
     end
   end
