@@ -68,7 +68,7 @@ RSpec.describe "merchant's bulk discounts index", type: :feature do
           within '#discount-table' do
             expect(page).to have_content("#{carly_bd_1.discount}%")
             expect(page).to have_content("#{carly_bd_1.threshold} items")
-            expect(page).to have_selector(css: "bd-id-#{carly_bd_1.id}", count: 1)
+            expect(page).to have_selector(:css, "#bd-id-#{carly_bd_1.id}", count: 1)
 
             within "#bd-id-#{carly_bd_1.id}" do
               click_link('Delete Discount')
@@ -76,7 +76,7 @@ RSpec.describe "merchant's bulk discounts index", type: :feature do
           end
           expect(current_path).to eq(merchant_bulk_discounts_path(carly))
           within '#discount-table' do
-            expect(page).to_not have_selector(css: "bd-id-#{carly_bd_1.id}", count: 1)
+            expect(page).to_not have_selector(:css, "#bd-id-#{carly_bd_1.id}")
           end
         end
       end

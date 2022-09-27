@@ -5,6 +5,11 @@ class Merchant::BulkDiscountsController < Merchant::BaseController
     @bulk_discounts = @merchant.find_relevant_discounts
   end
 
+  def destroy
+    BulkDiscount.destroy(params[:id])
+    redirect_to merchant_bulk_discounts_path(@merchant)
+  end
+
   private
   def bulk_discount_params
     params.permit(:discount, :threshold)
