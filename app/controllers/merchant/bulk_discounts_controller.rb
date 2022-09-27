@@ -12,23 +12,37 @@ class Merchant::BulkDiscountsController < Merchant::BaseController
 
   def create
     bulk_discount = @merchant.bulk_discounts.new(bulk_discount_params)
-    bulk_discount.save
-    flash.notice = "New Discount (ID: #{bulk_discount.id} Created for #{@merchant.name}"
-    redirect_to merchant_bulk_discounts_path(@merchant)
+    if params[:discount] == '' || params[:threshold] == ''
+      flash[:notice] = 'Both fields must have values. Please try again.'
+      redirect_to new_merchant_bulk_discount_path(@merchant)
+    elsif !params[:discount].to_i.positive? 
+      flash[:notice] = 'Percent discount must be greater than zero. Please try again.'
+      redirect_to new_merchant_bulk_discount_path(@merchant)
+    elsif !params[:threshold].to_i.positive?
+      flash[:notice] = 'Threshold must be greater than zero. Please try again.'
+      redirect_to new_merchant_bulk_discount_path(@merchant)
+    else
+      bulk_discount.save(bulk_discount_params)
+      flash[:notice] = 'Bulk discount has been successfully created.'
+      redirect_to merchant_bulk_discounts_path(@merchant)
+    end
   end
 
   def update
     @bulk_discount = BulkDiscount.find(params[:id])
-    if params[:discount] && params[:discount].gsub('0', '') == ""
-      flash[:notice] = 'Zero percent discount not permitted. Please try again.'
+    if params[:discount] == '' || params[:threshold] == ''
+      flash[:notice] = 'Both fields must have values. Please try again.'
       redirect_to edit_merchant_bulk_discount_path(@merchant,@bulk_discount)
-    elsif params[:discount] && params[:threshold]
+    elsif !params[:discount].to_i.positive? 
+      flash[:notice] = 'Percent discount must be greater than zero. Please try again.'
+      redirect_to edit_merchant_bulk_discount_path(@merchant,@bulk_discount)
+    elsif !params[:threshold].to_i.positive?
+      flash[:notice] = 'Threshold must be greater than zero. Please try again.'
+      redirect_to edit_merchant_bulk_discount_path(@merchant,@bulk_discount)
+    else
       @bulk_discount.update(bulk_discount_params)
       flash[:notice] = 'Bulk discount has been successfully updated.'
       redirect_to merchant_bulk_discount_path(@merchant,@bulk_discount)
-    else
-      flash[:notice] = 'Both fields must have values. Please try again.'
-      redirect_to edit_merchant_bulk_discount_path(@merchant,@bulk_discount)
     end
   end
 
