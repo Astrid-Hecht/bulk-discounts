@@ -12,10 +12,14 @@ class Invoice < ApplicationRecord
   end
 
   def merchant_items(merchant)
-    self.items.where(items: { merchant_id: merchant.id } ).distinct
+    self.items.where(items: { merchant_id: merchant.id }).distinct
   end
 
   def calculate_invoice_revenue
     self.invoice_items.sum("quantity*unit_price")
+  end
+
+  def merchant_invoice_revenue(merchant)
+    merchant_items(merchant).joins(:invoice_items).pluck(Arel.sql("SUM(invoice_items.quantity*invoice_items.unit_price)")).first
   end
 end

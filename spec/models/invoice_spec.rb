@@ -115,7 +115,7 @@ RSpec.describe Invoice, type: :model do
         end
       end
 
-      describe '#calculate_total_revenue' do
+      describe '#calculate_invoice_revenue' do
         it 'returns the total amount of revenue that invoice generated for invoice merchant' do
           expect(alaina_invoice1.calculate_invoice_revenue).to eq(jc_total + alaina_invoice1.merchant_invoice_revenue(carly_silo))
         end
@@ -127,15 +127,15 @@ RSpec.describe Invoice, type: :model do
           expect(alaina_invoice1.discount_merchant_invoice_revenue(jewlery_city)).to eq(jc_total)
         end
 
-        before(:each) { jewlery_city.bulk_discount.create!(discount: 50, threshold: 5)}
+        before(:each) { jewlery_city.bulk_discounts.create!(discount: 50, threshold: 5)}
 
         it 'returns the total amount of revenue that invoice generated for merchant if no BulkDiscount thresholds are met' do
           expect(alaina_invoice1.discount_merchant_invoice_revenue(jewlery_city)).to eq(jc_total)
         end
 
         it 'should not be affected by bulk discounts from different merchants, even if items on invoice qualify' do
-          carly_silo.bulk_discount.create!(discount: 10, threshold: 2)
-          carly_silo.bulk_discount.create!(discount: 50, threshold: 4)
+          carly_silo.bulk_discounts.create!(discount: 10, threshold: 2)
+          carly_silo.bulk_discounts.create!(discount: 50, threshold: 4)
 
           expect(alaina_invoice1.discount_merchant_invoice_revenue(jewlery_city)).to eq(jc_total)
         end
@@ -158,7 +158,7 @@ RSpec.describe Invoice, type: :model do
         end
 
         it 'should calculate revenue with best applicable discount' do
-          jewlery_city.bulk_discount.create!(discount: 10, threshold: 2)
+          jewlery_city.bulk_discounts.create!(discount: 10, threshold: 2)
           InvoiceItem.find(alainainvoice1_itemgold_earrings.id).update!(invoice_id: alaina_invoice1.id, 
                                                                         item_id: gold_earrings.id, quantity: 5,
                                                                         unit_price: 1300, status:"packaged" )
@@ -170,7 +170,7 @@ RSpec.describe Invoice, type: :model do
         end
 
         it 'should calculate revenue with best applicable discount even if threshold is lower than others' do
-          jewlery_city.bulk_discount.create!(discount: 90, threshold: 2)
+          jewlery_city.bulk_discounts.create!(discount: 90, threshold: 2)
           InvoiceItem.find(alainainvoice1_itemgold_earrings.id).update!(invoice_id: alaina_invoice1.id, item_id: gold_earrings.id,
                                                                         quantity: 5, unit_price: 1300, status:"packaged" )
           InvoiceItem.find(alainainvoice1_itemsilver_necklace.id).update!(invoice_id: alaina_invoice1.id, item_id: silver_necklace.id,
@@ -180,10 +180,10 @@ RSpec.describe Invoice, type: :model do
         end
       end
 
-      descibe '#discount_total_revenue' do
+      describe '#discount_total_revenue' do
         before(:each) do
-          jewlery_city.bulk_discount.create!(discount: 50, threshold: 4)
-          carly_silo.bulk_discount.create!(discount: 10, threshold: 2)
+          jewlery_city.bulk_discounts.create!(discount: 50, threshold: 4)
+          carly_silo.bulk_discounts.create!(discount: 10, threshold: 2)
         end
 
         it 'should calculate total revenue with discounts' do
