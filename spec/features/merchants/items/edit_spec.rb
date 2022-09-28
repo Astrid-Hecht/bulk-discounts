@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'Merchant Item Update' do
+RSpec.describe 'Merchant Item Update', type: :feature  do
   let!(:carly) { Merchant.create!(name: "Carly Simon's Candy Silo")}
 
   let!(:peanut) { carly.items.create!(name: "Peanut Bronzinos", description: "Some stuff", unit_price: 1500) }

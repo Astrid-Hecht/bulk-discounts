@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'New Merchant' do
+RSpec.describe 'New Merchant', type: :feature  do
   before(:each) {visit new_admin_merchant_path}
   it 'has a form to create a new merchant' do
     expect(page).to have_field(:name)

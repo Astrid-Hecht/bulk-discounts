@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'Merchant Items Show Page' do
+RSpec.describe 'Merchant Items Show Page', type: :feature  do
   let!(:carly) { Merchant.create!(name: "Carly Simon's Candy Silo")}
 
   let!(:licorice) { carly.items.create!(name: "Licorice Funnels", description: "Some stuff", unit_price: 1200) }

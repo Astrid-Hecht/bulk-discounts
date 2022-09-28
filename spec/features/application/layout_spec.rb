@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'application layout' do
+RSpec.describe 'application layout', type: :feature  do
   describe 'header content' do
     let!(:jewlery) { Merchant.create!(name: "Jewlery City Merchant")}
     let!(:gold_earrings) { jewlery.items.create!(name: "Gold Earrings", description: "14k Gold 12' Hoops", unit_price: 12000) }

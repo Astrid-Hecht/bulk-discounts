@@ -12,9 +12,9 @@ class Invoice < ApplicationRecord
     where("status = 2").order(:created_at)
   end
 
-  def merchant_items(merchant)
-    items.where(items: { merchant_id: merchant.id }).joins(:invoice_items).distinct
-  end
+  # def merchant_items(merchant)
+  #   items.where(items: { merchant_id: merchant.id }).joins(:invoice_items).distinct
+  # end
 
   def calculate_invoice_revenue
     invoice_items.sum("quantity*unit_price")

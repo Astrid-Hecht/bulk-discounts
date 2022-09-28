@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'Merchant Index Show Page' do
+RSpec.describe 'Merchant Index Show Page', type: :feature do
 
   # test data collapsed here
   let!(:jewlery_city) { Merchant.create!(name: "Jewlery City Merchant")}
@@ -18,11 +18,11 @@ RSpec.describe 'Merchant Index Show Page' do
 
 # alaina_invoice1 should have, from Jewelry, gold earrings and silver necklace, NOT studded bracelet. should also have licorice id, but that should not be shown for this merchant
   let!(:alainainvoice1_itemgold_earrings) { InvoiceItem.create!(invoice_id: alaina_invoice1.id, item_id: gold_earrings.id, quantity: 4, unit_price: 1300, status:"packaged" )}
-  let!(:alainainvoice9_itemgold_earrings) { InvoiceItem.create!(invoice_id: alaina_invoice1.id, item_id: gold_earrings.id, quantity: 6, unit_price: 1111, status:"packaged" )}
+  let!(:alainainvoice1_itemgold_earrings2) { InvoiceItem.create!(invoice_id: alaina_invoice1.id, item_id: gold_earrings.id, quantity: 6, unit_price: 1111, status:"packaged" )}
 
   let!(:alainainvoice1_itemsilver_necklace) { InvoiceItem.create!(invoice_id: alaina_invoice1.id, item_id: silver_necklace.id, quantity: 7, unit_price: 1500, status:"packaged" )}
 
-  let!(:alainainvoice1_itemsilver_necklace) { InvoiceItem.create!(invoice_id: alaina_invoice1.id, item_id: silver_necklace.id, quantity: 4, unit_price: 1300, status:"packaged" )}
+  let!(:alainainvoice1_itemsilver_necklace2) { InvoiceItem.create!(invoice_id: alaina_invoice1.id, item_id: silver_necklace.id, quantity: 4, unit_price: 1300, status:"packaged" )}
 
   let!(:alainainvoice1_itemglicorice) { InvoiceItem.create!(invoice_id: alaina_invoice1.id, item_id: licorice.id, quantity: 4, unit_price: 1300, status:"packaged" )}
 
@@ -62,10 +62,10 @@ RSpec.describe 'Merchant Index Show Page' do
       end
 
       it 'displays the quantity, sale price, and status for each item' do
-        within("#item_#{alainainvoice9_itemgold_earrings.id}") do
-          expect(page).to have_content("#{alainainvoice9_itemgold_earrings.quantity}")
-          expect(page).to have_content("#{((alainainvoice9_itemgold_earrings.unit_price)/100.to_f).round(2)}")
-          expect(page).to have_field("Status", with: alainainvoice9_itemgold_earrings.status)
+        within("#item_#{alainainvoice1_itemgold_earrings.id}") do
+          expect(page).to have_content("#{alainainvoice1_itemgold_earrings.quantity}")
+          expect(page).to have_content("#{((alainainvoice1_itemgold_earrings.unit_price)/100.to_f).round(2)}")
+          expect(page).to have_field("Status", with: alainainvoice1_itemgold_earrings.status)
         end
 
         within("#item_#{alainainvoice1_itemsilver_necklace.id}") do
@@ -77,7 +77,7 @@ RSpec.describe 'Merchant Index Show Page' do
       
       describe 'when I change an items status and click the submit button' do
         it 'takes me back to the merchant invoice show page and shows the updated status' do
-          within("#item_#{alainainvoice9_itemgold_earrings.id}") do
+          within("#item_#{alainainvoice1_itemgold_earrings.id}") do
             expect(page).to have_field("Status", with: "packaged")
             select "shipped", from: :status
             click_on "Update Item Status"
@@ -85,7 +85,7 @@ RSpec.describe 'Merchant Index Show Page' do
 
           expect(current_path).to eq merchant_invoice_path(jewlery_city, alaina_invoice1)
 
-          within("#item_#{alainainvoice9_itemgold_earrings.id}") do
+          within("#item_#{alainainvoice1_itemgold_earrings.id}") do
             expect(page).to have_field("Status", with: "shipped")
           end
         end
@@ -104,10 +104,44 @@ RSpec.describe 'Merchant Index Show Page' do
       end
 
       describe 'Bulk Discount Revenue' do
+        before(:each) do
+          @bd1 = jewlery_city.bulk_discounts.create!(discount: 50, threshold: 5)
+          visit merchant_invoice_path(jewlery_city, alaina_invoice1)
+        end
+
         it 'And I see the total discounted revenue for my merchant from this invoice which includes bulk discounts in the calculation' do
           within("#discount_invoice_revenue") do
             expect(page).to have_content("Total Revenue With Discounts From This Invoice: $#{sprintf("%.2f",alaina_invoice1.discount_invoice_revenue/100.to_f)}")
           end
+        end
+
+        it 'Next to each invoice item I see a link to the show page for the bulk discount that was applied (if any)' do
+          within("#item_#{alainainvoice1_itemgold_earrings.id}") do
+            expect(page).to_not have_link('Applied Discount')
+          end
+          within("#item_#{alainainvoice1_itemgold_earrings2.id}") do
+            expect(page).to have_link('Applied Discount')
+            click_link 'Applied Discount'
+          end
+          expect(current_path).to eq(merchant_bulk_discount_path(jewlery_city, @bd1))
+        end
+
+        it 'links to the best possible discount' do 
+          within("#item_#{alainainvoice1_itemsilver_necklace.id}") do
+            expect(page).to have_link('Applied Discount')
+            click_link 'Applied Discount'
+          end
+          expect(current_path).to eq(merchant_bulk_discount_path(jewlery_city, @bd1))
+
+          bd2 = jewlery_city.bulk_discounts.create!(discount: 75, threshold: 7)
+
+          visit merchant_invoice_path(jewlery_city, alaina_invoice1)
+
+          within("#item_#{alainainvoice1_itemsilver_necklace.id}") do
+            expect(page).to have_link('Applied Discount')
+            click_link 'Applied Discount'
+          end
+          expect(current_path).to eq(merchant_bulk_discount_path(jewlery_city, bd2))
         end
       end
     end

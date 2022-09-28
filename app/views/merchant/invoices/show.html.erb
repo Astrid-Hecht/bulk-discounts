@@ -21,12 +21,12 @@
 <p style='margin-left:20px'><%= @invoice.customer.name %></p>
 
 <h3>Items on this Invoice </h3>
-<table id="invoice_items">
-  <tr>
-    <th>Item Name</th>
-    <th>Quantity</th>
-    <th>Unit Price</th>
-    <th>Status</th>
+<table id="invoice_items" style='border:0px;border-left:2px solid rgb(200,200,200)'>
+  <tr >
+    <th style='border-top:2px solid rgb(200,200,200)'>Item Name</th>
+    <th style='border-top:2px solid rgb(200,200,200)'>Quantity</th>
+    <th style='border-top:2px solid rgb(200,200,200)'>Unit Price</th>
+    <th style='border-top:2px solid rgb(200,200,200)'>Status</th>
   </tr>
   <% @invoice.invoice_items.each do |item| %>
   <% if item.item.merchant_id == @merchant.id %>
@@ -40,10 +40,15 @@
           <%= f.select :status, options_for_select([:pending, :packaged, :shipped], selected: item.status) %>
           <%= f.hidden_field :invoice_id, value: @invoice.id %>
           <%= f.submit "Update Item Status"  %>
+        <% end %>
+      </td style='border-right:2px solid rgb(200,200,200)'>
+      <% if item.best_discount%>
+      <td style='border:0px; background-color: transparent;'>
+          <%= link_to "Applied Discount", merchant_bulk_discount_path(@merchant,item.best_discount) %>
       </td>
       <% end %>
-      <% end %>
-    </li>
+    </tr>
+    <% end %>
   <% end %>
 </table>
 

@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'Merchant Items Index' do
+RSpec.describe 'Merchant Items Index', type: :feature  do
   let!(:carly_silo) { Merchant.create!(name: "Carly Simon's Candy Silo")}
   let!(:bmv) { Merchant.create!(name: "Bavarian Motor Velocycles")}
 

@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'admin invoice show' do
+RSpec.describe 'admin invoice show', type: :feature  do
     let!(:jewlery_city) { Merchant.create!(name: "Jewlery City Merchant")}
     let!(:carly_silo) { Merchant.create!(name: "Carly Simon's Candy Silo")}
 
