@@ -1,5 +1,6 @@
 class Merchant::BulkDiscountsController < Merchant::BaseController
   before_action :set_bulk_discount, only: [:show, :edit]
+  before_action :get_holidays, only: [:index]
 
   def index
     @bulk_discounts = @merchant.find_relevant_discounts
@@ -53,5 +54,9 @@ class Merchant::BulkDiscountsController < Merchant::BaseController
 
   def set_bulk_discount
     @bulk_discount = BulkDiscount.find(params[:id])
+  end
+
+  def get_holidays
+    @holidays = HolidayFacade.next_3
   end
 end

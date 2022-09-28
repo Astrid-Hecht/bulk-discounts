@@ -17,6 +17,14 @@ RSpec.describe "merchant's bulk discounts index", type: :feature do
         visit merchant_bulk_discounts_path(carly)
       end
 
+      it 'I see the next three holidays and their dates' do
+        within '#holidays' do
+          expect(page).to have_selector(:css, '.holiday', count: 3)
+          expect(page).to have_content('Name:', count: 3)
+          expect(page).to have_content('Date:', count: 3)
+        end
+      end
+
       it 'Where I see all of my bulk discounts' do
         within '#discount-table' do
           expect(page).to have_selector(:css, '.discount', count: 3)
