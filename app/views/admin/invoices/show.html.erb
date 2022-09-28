@@ -7,19 +7,35 @@
 
   <p>Created at: <%= @invoice.created_at.strftime('%A, %B %d, %Y') %></p>
   <p>Total Revenue: <%= price_round(@invoice.calculate_invoice_revenue) %></p>
+  
+  <div id="discount_invoice_revenue">
+    <p>Total Revenue With Discounts From This Invoice: <%= price_round(@invoice.discount_invoice_revenue)%></p>
+  </div>
+  
   <h4 style='font-size:150%'>Customer:<h4> 
   <p style='font-weight:normal; margin-top:-20px; margin-left:20px; margin-bottom:50px'><%= @invoice.customer.name %></p>
 </div>
 
 <h3>Invoice Items</h3>
-<table id="invoice_items" class='table_full'>
-  <tr><h4><th>Item Name</th><th>Quantity</th><th>Unit Price</th><th>Status</th></h4></tr>
+<table id="invoice_items" class='table_full' style='border:0px;border-left:2px solid rgb(200,200,200)'>
+  <tr><h4>
+    <th style='border-top:2px solid rgb(200,200,200)'>Item Name</th>
+    <th style='border-top:2px solid rgb(200,200,200)'>Quantity</th>
+    <th style='border-top:2px solid rgb(200,200,200)'>Unit Price</th>
+    <th style='border-top:2px solid rgb(200,200,200);border-right:2px solid rgb(200,200,200)'>Status</th>
+  </h4></tr>
+
   <% @invoice.invoice_items.each do |item| %>
     <tr id="item_<%= item.id %>">
       <td id="name_<%= item.id %>"><%= item.item.name %></td>
       <td id="quant_<%= item.id %>"><%= item.quantity %></td>
       <td id="unit_price_<%= item.id %>"><%= price_round(item.unit_price) %></td>
-      <td id="status_<%= item.id %>"><%= item.status %></td>
+      <td id="status_<%= item.id %>" style='border-right:2px solid rgb(200,200,200)'><%= item.status %></td>
+      <% if item.best_discount%>
+        <td style='border:0px; background-color: transparent; max-width: 50px;'>
+        <%= link_to "Applied Discount", merchant_bulk_discount_path(item.item.merchant_id,item.best_discount) %>
+        </td>
+      <% end %>
     </tr>
   <% end %>
 </table>
