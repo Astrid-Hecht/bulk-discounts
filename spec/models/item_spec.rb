@@ -50,11 +50,6 @@ RSpec.describe Item, type: :model do
      end
     end
 
-    describe '#invoice_item(invoice)' do
-      it 'returns an InvoiceItem object given an invoice' do
-        expect(rocker.invoice_item(gordy_inv1)).to eq(item_inv1)
-      end
-    end
 
     describe '#best_sales_date' do
       it 'returns the date with most sales for an item' do

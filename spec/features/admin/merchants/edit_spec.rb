@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.shared_context 'merchant edit' do
+RSpec.shared_context 'merchant edit', type: :feature  do
   def name_update
     fill_in 'Name', with: "Carlos Simon's Candy Silo"
     click_on 'Submit'

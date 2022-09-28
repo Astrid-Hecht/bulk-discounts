@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'admin invoice index' do
+RSpec.describe 'admin invoice index', type: :feature  do
 
     let!(:joey) { Customer.create!(first_name: "Joey", last_name: "Ondricka")}
 

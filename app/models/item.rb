@@ -12,8 +12,4 @@ class Item < ApplicationRecord
     date = self.invoices.select(:created_at, "invoice_items.unit_price*quantity as revenue").order("revenue desc", "invoices.created_at desc").first.created_at
     date.strftime("%B %d, %Y")
   end
-
-  def invoice_item(invoice)
-    InvoiceItem.select("invoice_items.*").where(item_id: self.id, invoice_id: invoice.id).order(created_at: :desc).first
-  end
 end

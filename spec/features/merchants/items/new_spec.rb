@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'New Merchant Item Spec' do
+RSpec.describe 'New Merchant Item Spec', type: :feature  do
   let!(:carly) { Merchant.create!(name: "Carly Simon's Candy Silo")}
 
   it 'has a form to create a new item' do
