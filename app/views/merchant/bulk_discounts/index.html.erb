@@ -4,7 +4,7 @@
 
 <h2>My Bulk Discounts</h2>
 <p><%= flash.notice %></p>
-<table id="discount-table">
+<table id="discount-table" style='width:43vw; margin-bottom: 50px;'>
   <tr class='headings'>
     <th>Discount ID</th>
     <th>Percentage</th>
@@ -21,3 +21,12 @@
 <% end %>
 </table>
 <p><%= link_to "Create New Bulk Discount", new_merchant_bulk_discount_path(@merchant) %> </p>
+
+<% content_for :aside do %>
+  <table id='holidays' style='width:43vw; margin-top: 50px;'>
+    <tr><th>Upcoming Holidays</th></tr>
+    <%@holidays.each do |holiday|%>
+      <tr><td class='holiday'><%= holiday %></td></tr>
+    <%end%>
+  </table>
+<%end%>
