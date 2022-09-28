@@ -62,13 +62,13 @@ RSpec.describe 'Merchant Index Show Page' do
       end
 
       it 'displays the quantity, sale price, and status for each item' do
-        within("#item_#{gold_earrings.id}") do
+        within("#item_#{alainainvoice9_itemgold_earrings.id}") do
           expect(page).to have_content("#{alainainvoice9_itemgold_earrings.quantity}")
           expect(page).to have_content("#{((alainainvoice9_itemgold_earrings.unit_price)/100.to_f).round(2)}")
           expect(page).to have_field("Status", with: alainainvoice9_itemgold_earrings.status)
         end
 
-        within("#item_#{silver_necklace.id}") do
+        within("#item_#{alainainvoice1_itemsilver_necklace.id}") do
           expect(page).to have_content("#{alainainvoice1_itemsilver_necklace.quantity}")
           expect(page).to have_content("#{((alainainvoice1_itemsilver_necklace.unit_price)/100.to_f).round(2)}")
           expect(page).to have_field("Status", with: alainainvoice1_itemsilver_necklace.status)
@@ -77,8 +77,7 @@ RSpec.describe 'Merchant Index Show Page' do
       
       describe 'when I change an items status and click the submit button' do
         it 'takes me back to the merchant invoice show page and shows the updated status' do
-
-          within("#item_#{gold_earrings.id}") do
+          within("#item_#{alainainvoice9_itemgold_earrings.id}") do
             expect(page).to have_field("Status", with: "packaged")
             select "shipped", from: :status
             click_on "Update Item Status"
@@ -86,7 +85,7 @@ RSpec.describe 'Merchant Index Show Page' do
 
           expect(current_path).to eq merchant_invoice_path(jewlery_city, alaina_invoice1)
 
-          within("#item_#{gold_earrings.id}") do
+          within("#item_#{alainainvoice9_itemgold_earrings.id}") do
             expect(page).to have_field("Status", with: "shipped")
           end
         end
@@ -94,14 +93,20 @@ RSpec.describe 'Merchant Index Show Page' do
 
       it 'Then I see the total revenue that will be generated from all of my items on the invoice' do
         within("#total_invoice_revenue") do
-          expect(page).to have_content("Total Revenue From This Invoice: $#{sprintf("%.2f",alaina_invoice1.calculate_total_revenue/100.to_f)}")
+          expect(page).to have_content("Total Revenue From This Invoice: $#{sprintf("%.2f",alaina_invoice1.calculate_invoice_revenue/100.to_f)}")
+        end
+      end
+
+      it 'Then I see the total revenue that will be generated from all of my items on the invoice' do
+        within("#merchant_invoice_revenue") do
+          expect(page).to have_content("Your Revenue From This Invoice: $#{sprintf("%.2f",alaina_invoice1.merchant_invoice_revenue(jewlery_city)/100.to_f)}")
         end
       end
 
       describe 'Bulk Discount Revenue' do
         it 'And I see the total discounted revenue for my merchant from this invoice which includes bulk discounts in the calculation' do
           within("#discount_invoice_revenue") do
-            expect(page).to have_content("Total Discounted Revenue From This Invoice: $#{sprintf("%.2f",alaina_invoice1.discount_total_revenue/100.to_f)}")
+            expect(page).to have_content("Total Revenue With Discounts From This Invoice: $#{sprintf("%.2f",alaina_invoice1.discount_invoice_revenue/100.to_f)}")
           end
         end
       end

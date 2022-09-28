@@ -6,10 +6,17 @@
 
 <p>Status: <%= @invoice.status %></p>
 <p>Created at: <%= @invoice.created_at.strftime("%A, %B %d, %Y") %></p>
+
 <div id="total_invoice_revenue">
-<p>Total Revenue From This Invoice: <%= price_round(@invoice.calculate_invoice_revenue)%></p>
-<p>Your Revenue From This Invoice: <%= price_round(@invoice.merchant_invoice_revenue(@merchant))%></p>
+  <p>Total Revenue From This Invoice: <%= price_round(@invoice.calculate_invoice_revenue)%></p>
 </div>
+<div id="merchant_invoice_revenue">
+  <p>Your Revenue From This Invoice: <%= price_round(@invoice.merchant_invoice_revenue(@merchant))%></p>
+</div>
+<div id="discount_invoice_revenue">
+  <p>Total Revenue With Discounts From This Invoice: <%= price_round(@invoice.discount_invoice_revenue)%></p>
+</div>
+
 <h3>Customer:</h3>
 <p style='margin-left:20px'><%= @invoice.customer.name %></p>
 
@@ -22,6 +29,7 @@
     <th>Status</th>
   </tr>
   <% @invoice.invoice_items.each do |item| %>
+  <% if item.item.merchant_id == @merchant.id %>
     <tr  id="item_<%= item.id %>">
       <td><%= item.item.name %></td>
       <td><%= item.quantity %></td>
@@ -33,6 +41,7 @@
           <%= f.hidden_field :invoice_id, value: @invoice.id %>
           <%= f.submit "Update Item Status"  %>
       </td>
+      <% end %>
       <% end %>
     </li>
   <% end %>
